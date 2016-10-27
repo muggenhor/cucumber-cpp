@@ -14,13 +14,13 @@ public:
 //private:
     static const int cukeRegId;
 };
-const int ManualStep::cukeRegId = ::cucumber::internal::registerStep<ManualStep>(MANUAL_STEP_MATCHER, "C:\\Path\\With/Barward/And\\Forward/Slashes.cpp", 42);
+const int ManualStep::cukeRegId = ::cucumber::internal::registerStep<ManualStep>(MANUAL_STEP_MATCHER, "C:\\Path\\With/Barward/And\\Forward/Slashes.cpp:42");
 
 TEST(StepRegistrationTest, manualRegistration) {
     // static_cast is necessary for GTest <= 1.7 and C++ >= 2011 because it
     // doesn't support contextually-convertible-to-bool
     EXPECT_TRUE(static_cast<bool>(StepManager::stepMatches(MANUAL_STEP_MATCHER)));
-    EXPECT_EQ("Slashes.cpp:42", StepManager::getStep(ManualStep::cukeRegId)->source);
+    EXPECT_STREQ("Slashes.cpp:42", StepManager::getStep(ManualStep::cukeRegId)->source);
 }
 
 #define GIVEN_MATCHER "given matcher"

@@ -272,8 +272,8 @@ namespace {
                     jsonArgs.push_back(jsonMa);
                 }
                 jsonM["args"] = jsonArgs;
-                if (!m.source.empty()) {
-                    jsonM["source"] = m.source;;
+                if (m.source && strlen(m.source) > 0) {
+                    jsonM["source"] = m.source;
                 }
                 if (!m.regexp.empty()) {
                     jsonM["regexp"] = m.regexp;

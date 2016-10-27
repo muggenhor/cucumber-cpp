@@ -1,6 +1,7 @@
 #ifndef CUKE_STEPMANAGER_HPP_
 #define CUKE_STEPMANAGER_HPP_
 
+#include <cstring>
 #include <map>
 #include <sstream>
 #include <stdexcept>
@@ -101,13 +102,13 @@ public:
 
 class CUCUMBER_CPP_EXPORT StepInfo : public boost::enable_shared_from_this<StepInfo> {
 public:
-    StepInfo(const std::string &stepMatcher, const std::string source);
+    StepInfo(const std::string &stepMatcher, const char* const source);
     SingleStepMatch matches(const std::string &stepDescription) const;
     virtual InvokeResult invokeStep(const InvokeArgs * pArgs) const = 0;
 
     step_id_type id;
     Regex regex;
-    const std::string source;
+    const char* const source;
 private:
     // Shut up MSVC warning C4512: assignment operator could not be generated
     StepInfo& operator=(const StepInfo& other);
@@ -166,7 +167,7 @@ private:
 template<class T>
 class StepInvoker : public StepInfo {
 public:
-    StepInvoker(const std::string &stepMatcher, const std::string source);
+    StepInvoker(const std::string &stepMatcher, const char* const source);
 
     InvokeResult invokeStep(const InvokeArgs *args) const;
 };
@@ -192,23 +193,27 @@ private:
 };
 
 
-static inline std::string toSourceString(const char *filePath, const int line) {
-    using namespace std;
-    stringstream s;
-    string file(filePath);
-    string::size_type pos = file.find_last_of("/\\");
-    if (pos == string::npos) {
-        s << file;
+static inline const char* toSourceString(const char* const fileLocation) {
+    using std::strrchr;
+    const char* pos = strrchr(fileLocation, '/');
+    if (pos == NULL) {
+        pos = strrchr(fileLocation, '\\');
     } else {
-       s << file.substr(++pos);
+        const char* maybeNewPos = strrchr(pos, '\\');
+        if (maybeNewPos != NULL) {
+            pos = maybeNewPos;
+        }
     }
-    s << ":" << line;
-    return s.str();
+    if (pos == NULL) {
+        return fileLocation;
+    } else {
+        return pos + 1;
+    }
 }
 
 template<class T>
-static int registerStep(const std::string &stepMatcher, const char *file, const int line) {
-   return StepManager::addStep(boost::make_shared< StepInvoker<T> >(stepMatcher, toSourceString(file, line)));
+static int registerStep(const std::string &stepMatcher, const char* const fileLocation) {
+   return StepManager::addStep(boost::make_shared< StepInvoker<T> >(stepMatcher, toSourceString(fileLocation)));
 }
 
 template<typename T>
@@ -251,7 +256,7 @@ const T BasicStep::getInvokeArg() {
 
 
 template<class T>
-StepInvoker<T>::StepInvoker(const std::string &stepMatcher, const std::string source) :
+StepInvoker<T>::StepInvoker(const std::string &stepMatcher, const char* const source) :
     StepInfo(stepMatcher, source) {
 }
 

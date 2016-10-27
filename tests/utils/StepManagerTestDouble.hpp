@@ -9,7 +9,7 @@ namespace internal {
 
 class StepInfoNoOp : public StepInfo {
 public:
-    StepInfoNoOp(const std::string &stepMatcher, const std::string source) : StepInfo(stepMatcher, source) {}
+    StepInfoNoOp(const std::string &stepMatcher, const char* const source) : StepInfo(stepMatcher, source) {}
     InvokeResult invokeStep(const InvokeArgs*) const {
         return InvokeResult::success();
     }
@@ -69,7 +69,7 @@ public:
     }
 
     static step_id_type addStepDefinitionWithId(step_id_type desiredId, const std::string &stepMatcher,
-            const std::string source) {
+            const char* const source) {
         boost::shared_ptr<StepInfo> stepInfo(boost::make_shared<StepInfoNoOp>(stepMatcher, source));
         stepInfo->id = desiredId;
         return addStep(stepInfo);

@@ -25,9 +25,14 @@ CUKE_OBJECT_(                                               \
 )                                                           \
 /**/
 
+#define CUKE_STRINGIFY_BASE_(x) #x
+#define CUKE_STRINGIFY_(x) CUKE_STRINGIFY_BASE_(x)
+#define CUKE_AT_ __FILE__ ":" CUKE_STRINGIFY_(__LINE__)
+/**/
+
 #define CUKE_STEP_REGISTRATION_(step_name, step_matcher) \
 ::cucumber::internal::registerStep< step_name >(         \
-    step_matcher, __FILE__, __LINE__                     \
+    step_matcher, CUKE_AT_                               \
 )                                                        \
 /**/
 

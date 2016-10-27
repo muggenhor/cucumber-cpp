@@ -4,7 +4,7 @@ namespace cucumber {
 namespace internal {
 
 
-StepInfo::StepInfo(const std::string &stepMatcher, const std::string source) :
+StepInfo::StepInfo(const std::string &stepMatcher, const char* const source) :
     regex(stepMatcher),
     source(source) {
     static step_id_type currentId = 0;

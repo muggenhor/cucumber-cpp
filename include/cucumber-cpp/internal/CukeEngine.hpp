@@ -20,9 +20,13 @@ public:
 
 class CUCUMBER_CPP_EXPORT StepMatch {
 public:
+    StepMatch()
+      : source() // Explicitly calling the default constructor, will zero-init for POD types
+    {}
+
     std::string id;
     std::vector<StepMatchArg> args;
-    std::string source;
+    const char* source;
     std::string regexp;
 };
 
