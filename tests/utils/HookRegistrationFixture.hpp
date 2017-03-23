@@ -2,10 +2,11 @@
 #define CUKE_HOOKREGISTRATIONFIXTURE_HPP_
 
 #include <cucumber-cpp/internal/hook/HookRegistrar.hpp>
+#include <cucumber-cpp/internal/utils/make_unique.hpp>
+#include <cucumber-cpp/internal/utils/unique_ptr.hpp>
 
 #include "CukeCommandsFixture.hpp"
 
-#include <boost/make_shared.hpp>
 #include <sstream>
 
 using namespace cucumber::internal;
@@ -64,10 +65,11 @@ static const InvokeArgs NO_INVOKE_ARGS;
 
 class HookRegistrationTest : public CukeCommandsFixture {
 protected:
-    shared_ptr<Scenario> emptyScenario;
+    unique<Scenario>::ptr emptyScenario;
 
-    HookRegistrationTest() {
-        emptyScenario = boost::make_shared<Scenario>();
+    HookRegistrationTest() :
+        emptyScenario(make_unique<Scenario>())
+    {
     }
 
     Scenario *getEmptyScenario() {

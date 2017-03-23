@@ -1,14 +1,14 @@
 #include "cucumber-cpp/internal/CukeCommands.hpp"
 #include "cucumber-cpp/internal/hook/HookRegistrar.hpp"
+#include "cucumber-cpp/internal/utils/make_unique.hpp"
 
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 
 namespace cucumber {
 namespace internal {
 
-shared_ptr<Scenario> CukeCommands::currentScenario;
+unique<Scenario>::ptr CukeCommands::currentScenario;
 
 CukeCommands::CukeCommands() : hasStarted(false) {
 }
@@ -25,7 +25,9 @@ void CukeCommands::beginScenario(const TagExpression::tag_list& tags) {
         HookRegistrar::execBeforeAllHooks();
     }
 
-    currentScenario = boost::make_shared<Scenario>(tags);
+    // Explicitly using namespace-qualified call to prevent ambiguity with std::make_unique (C++14),
+    // which becomes visible due to ADL.
+    assign(currentScenario, cucumber::internal::make_unique<Scenario>(tags));
     HookRegistrar::execBeforeHooks(currentScenario.get());
 }
 
