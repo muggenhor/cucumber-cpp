@@ -38,6 +38,12 @@ template <typename T, typename A1>
 typename enable_if_not_array<T>::type make_unique(const A1& a1) {
     return typename unique<T>::ptr(new T(a1));
 }
+
+template <typename T, typename A1, typename A2>
+typename enable_if_not_array<T>::type make_unique(
+        const A1& a1, const A2& a2) {
+    return typename unique<T>::ptr(new T(a1, a2));
+}
 # else
 template <typename T, typename... A>
 typename enable_if_not_array<T>::type make_unique(A&&... args) {

@@ -1,5 +1,6 @@
 #include <cucumber-cpp/internal/utils/Regex.hpp>
-#include <boost/make_shared.hpp>
+#include <cucumber-cpp/internal/utils/make_unique.hpp>
+#include <boost/version.hpp>
 
 namespace cucumber {
 namespace internal {
@@ -20,8 +21,15 @@ std::string Regex::str() const {
     return regexImpl.str();
 }
 
-boost::shared_ptr<RegexMatch> Regex::find(const std::string &expression) const {
-    return boost::make_shared<FindRegexMatch>(regexImpl, expression);
+RegexMatch::pointer Regex::find(const std::string &expression) const {
+    // Explicitly using namespace-qualified call to prevent ambiguity with std::make_unique (C++14),
+    // which becomes visible due to ADL.
+    return RegexMatch::pointer(cucumber::internal::make_unique<FindRegexMatch>(regexImpl, expression)
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 FindRegexMatch::FindRegexMatch(const boost::regex &regexImpl, const std::string &expression) {
@@ -37,8 +45,15 @@ FindRegexMatch::FindRegexMatch(const boost::regex &regexImpl, const std::string 
     }
 }
 
-boost::shared_ptr<RegexMatch> Regex::findAll(const std::string &expression) const {
-    return boost::make_shared<FindAllRegexMatch>(regexImpl, expression);
+RegexMatch::pointer Regex::findAll(const std::string &expression) const {
+    // Explicitly using namespace-qualified call to prevent ambiguity with std::make_unique (C++14),
+    // which becomes visible due to ADL.
+    return RegexMatch::pointer(cucumber::internal::make_unique<FindAllRegexMatch>(regexImpl, expression)
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 FindAllRegexMatch::FindAllRegexMatch(const boost::regex &regexImpl, const std::string &expression) {

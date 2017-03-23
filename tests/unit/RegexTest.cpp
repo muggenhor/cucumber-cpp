@@ -6,18 +6,14 @@ using namespace boost::assign;
 #include <cucumber-cpp/internal/utils/Regex.hpp>
 using namespace cucumber::internal;
 
-#include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
-
-
 TEST(RegexTest, matchesSimpleRegex) {
     Regex exact("^cde$");
 
-    shared_ptr<RegexMatch> match(exact.find("cde"));
+    RegexMatch::pointer match(exact.find("cde"));
     EXPECT_TRUE(match->matches());
     EXPECT_TRUE(match->getSubmatches().empty());
 
-    match = shared_ptr<RegexMatch>(exact.find("abcdefg"));
+    assign(match, exact.find("abcdefg"));
     EXPECT_FALSE(match->matches());
     EXPECT_TRUE(match->getSubmatches().empty());
 }
@@ -25,21 +21,21 @@ TEST(RegexTest, matchesSimpleRegex) {
 TEST(RegexTest, matchesRegexWithoutSubmatches) {
     Regex variable("x\\d+x");
 
-    shared_ptr<RegexMatch> match(variable.find("xxxx123xxx"));
+    RegexMatch::pointer match(variable.find("xxxx123xxx"));
     EXPECT_TRUE(match->matches());
 
-    match = shared_ptr<RegexMatch>(variable.find("xxx"));
+    assign(match, variable.find("xxx"));
     EXPECT_FALSE(match->matches());
 }
 
 TEST(RegexTest, matchesRegexWithSubmatches) {
     Regex sum("^(\\d+)\\+\\d+=(\\d+)$");
 
-    shared_ptr<RegexMatch> match(sum.find("1+2=3 "));
+    RegexMatch::pointer match(sum.find("1+2=3 "));
     EXPECT_FALSE(match->matches());
     EXPECT_TRUE(match->getSubmatches().empty());
 
-    match = shared_ptr<RegexMatch>(sum.find("42+27=69"));
+    assign(match, sum.find("42+27=69"));
     EXPECT_TRUE(match->matches());
     ASSERT_EQ(2, match->getSubmatches().size());
     EXPECT_EQ("42", match->getSubmatches()[0].value);
@@ -48,7 +44,7 @@ TEST(RegexTest, matchesRegexWithSubmatches) {
 
 TEST(RegexTest, findAllDoesNotMatchIfNoTokens) {
     Regex sum("([^,]+)(?:,|$)");
-    shared_ptr<RegexMatch> match(sum.findAll(""));
+    RegexMatch::pointer match(sum.findAll(""));
 
     EXPECT_FALSE(match->matches());
     EXPECT_EQ(0, match->getSubmatches().size());
@@ -56,7 +52,7 @@ TEST(RegexTest, findAllDoesNotMatchIfNoTokens) {
 
 TEST(RegexTest, findAllExtractsTheFirstGroupOfEveryToken) {
     Regex sum("([^,]+)(?:,|$)");
-    shared_ptr<RegexMatch> match(sum.findAll("a,b,cc"));
+    RegexMatch::pointer match(sum.findAll("a,b,cc"));
 
     EXPECT_TRUE(match->matches());
     EXPECT_EQ(3, match->getSubmatches().size());
@@ -66,7 +62,7 @@ TEST(RegexTest, findAllExtractsTheFirstGroupOfEveryToken) {
 /*
 TEST(RegexTest, findAllHasToMatchTheEntireInput) {
     Regex sum("([^,]+)(?:,|$)");
-    shared_ptr<RegexMatch> match(sum.findAll("1 a,b,cc"));
+    RegexMatch::pointer match(sum.findAll("1 a,b,cc"));
 
     EXPECT_FALSE(match->matches());
     EXPECT_EQ(0, match->getSubmatches().size());

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include "unique_ptr.hpp"
 #include <boost/regex.hpp>
 
 namespace cucumber {
@@ -17,6 +17,7 @@ struct RegexSubmatch {
 
 class RegexMatch {
 public:
+    typedef unique<RegexMatch>::ptr pointer;
     typedef std::vector<RegexSubmatch> submatches_type;
 
     virtual ~RegexMatch() {};
@@ -39,7 +40,6 @@ public:
     FindAllRegexMatch(const boost::regex &regexImpl, const std::string &expression);
 };
 
-
 class Regex {
 private:
     boost::regex regexImpl;
@@ -47,8 +47,8 @@ private:
 public:
     Regex(std::string expr);
 
-    boost::shared_ptr<RegexMatch> find(const std::string &expression) const;
-    boost::shared_ptr<RegexMatch> findAll(const std::string &expression) const;
+    RegexMatch::pointer find(const std::string &expression) const;
+    RegexMatch::pointer findAll(const std::string &expression) const;
 
     std::string str() const;
 };

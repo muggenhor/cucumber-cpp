@@ -13,7 +13,7 @@ StepInfo::StepInfo(const std::string &stepMatcher, const std::string source) :
 
 SingleStepMatch StepInfo::matches(const std::string &stepDescription) const {
     SingleStepMatch stepMatch;
-    boost::shared_ptr<RegexMatch> regexMatch(regex.find(stepDescription));
+    RegexMatch::pointer regexMatch(regex.find(stepDescription));
     if (regexMatch->matches()) {
         stepMatch.stepInfo = shared_from_this();
         stepMatch.submatches = regexMatch->getSubmatches();

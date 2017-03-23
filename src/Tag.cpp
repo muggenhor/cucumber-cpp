@@ -13,7 +13,7 @@ Regex & AndTagExpression::csvTagNotationRegex() {
 AndTagExpression::AndTagExpression() {}
 
 AndTagExpression::AndTagExpression(const std::string &csvTagNotation) {
-    const shared_ptr<RegexMatch> match(csvTagNotationRegex().findAll(csvTagNotation));
+    const RegexMatch::pointer match(csvTagNotationRegex().findAll(csvTagNotation));
     const RegexMatch::submatches_type submatches = match->getSubmatches();
     orExpressions.reserve(submatches.size());
     for (RegexMatch::submatches_type::const_iterator i = submatches.begin(); i != submatches.end(); ++i) {
@@ -37,7 +37,7 @@ Regex & OrTagExpression::csvTagNotationRegex() {
 }
 
 OrTagExpression::OrTagExpression(const std::string &csvTagNotation) {
-    const shared_ptr<RegexMatch> match(csvTagNotationRegex().findAll(csvTagNotation));
+    const RegexMatch::pointer match(csvTagNotationRegex().findAll(csvTagNotation));
     const RegexMatch::submatches_type submatches = match->getSubmatches();
     orTags.reserve(submatches.size());
     for (RegexMatch::submatches_type::const_iterator i = submatches.begin(); i != submatches.end(); ++i) {
