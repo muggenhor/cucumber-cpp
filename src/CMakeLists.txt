@@ -1,27 +1,29 @@
-set(CUKE_SOURCES
-    drivers/GenericDriver.cpp
-    ContextManager.cpp
-    CukeCommands.cpp
-    CukeEngine.cpp
-    CukeEngineImpl.cpp
-    StepManager.cpp
-    HookRegistrar.cpp
-    Regex.cpp
-    Scenario.cpp
-    Table.cpp
-    Tag.cpp
-    connectors/wire/WireServer.cpp
-    connectors/wire/WireProtocol.cpp
-    connectors/wire/WireProtocolCommands.cpp
-    )
+add_library(cucumber-cpp-sources INTERFACE)
+target_sources(cucumber-cpp-sources
+  INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/GenericDriver.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ContextManager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CukeCommands.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CukeEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CukeEngineImpl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/HookRegistrar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Regex.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scenario.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/StepManager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Table.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Tag.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/connectors/wire/WireServer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/connectors/wire/WireProtocol.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/connectors/wire/WireProtocolCommands.cpp
+)
 
 if(GTEST_FOUND)
-    list(APPEND CUKE_DEP_LIBRARIES GTest::GTest)
-    list(APPEND CUKE_SOURCES drivers/GTestDriver.cpp)
+    target_link_libraries(cucumber-cpp-sources INTERFACE GTest::GTest)
+    target_sources(cucumber-cpp-sources INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/drivers/GTestDriver.cpp)
 endif()
 
 if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
-    list(APPEND CUKE_SOURCES drivers/BoostDriver.cpp)
+    target_sources(cucumber-cpp-sources INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/drivers/BoostDriver.cpp)
 endif()
 
 if(CMAKE_EXTRA_GENERATOR OR MSVC_IDE)
@@ -30,15 +32,15 @@ if(CMAKE_EXTRA_GENERATOR OR MSVC_IDE)
     if(MSVC_IDE)
         source_group("Header Files" FILES ${CUKE_HEADERS})
     endif()
-    list(APPEND CUKE_SOURCES ${CUKE_HEADERS})
+    target_sources(cucumber-cpp-sources INTERFACE ${CUKE_HEADERS})
 endif()
 
-add_library(cucumber-cpp-nomain STATIC ${CUKE_SOURCES})
-add_library(cucumber-cpp STATIC ${CUKE_SOURCES} main.cpp)
-
 if(MINGW)
-    list(APPEND CUKE_DEP_LIBRARIES ws2_32)
+    target_link_libraries(cucumber-cpp-sources INTERFACE ws2_32)
 endif(MINGW)
 
-target_link_libraries(cucumber-cpp-nomain PRIVATE ${CUKE_DEP_LIBRARIES})
-target_link_libraries(cucumber-cpp PRIVATE ${CUKE_DEP_LIBRARIES})
+add_library(cucumber-cpp-nomain STATIC)
+add_library(cucumber-cpp STATIC main.cpp)
+
+target_link_libraries(cucumber-cpp-nomain PRIVATE cucumber-cpp-sources)
+target_link_libraries(cucumber-cpp PRIVATE cucumber-cpp-sources)
