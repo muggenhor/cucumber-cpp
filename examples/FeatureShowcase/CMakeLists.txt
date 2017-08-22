@@ -11,6 +11,7 @@ if(GMOCK_FOUND)
     endfunction()
 
     add_cucumber_executable(
+        features/step_definitions/DocStringSteps
         features/step_definitions/TagSteps
         features/step_definitions/TableSteps
     )

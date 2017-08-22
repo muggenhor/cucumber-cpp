@@ -53,11 +53,12 @@ for TEST in \
     build/examples/Calc/GTestCalculatorSteps \
     build/examples/Calc/BoostCalculatorSteps \
     build/examples/Calc/FuncArgsCalculatorSteps \
+    build/examples/FeatureShowcase/FeatureShowcaseSteps \
 ; do
     if [ -f "${TEST}" ]; then
         "${TEST}" > /dev/null &
         sleep 1
-        cucumber examples/Calc
+        cucumber "$(dirname "${TEST}" | sed 's|^build/||')"
         wait %
     fi
 done
