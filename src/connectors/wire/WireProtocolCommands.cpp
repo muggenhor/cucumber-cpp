@@ -1,5 +1,5 @@
 #include <cucumber-cpp/internal/connectors/wire/WireProtocolCommands.hpp>
-#include <boost/make_shared.hpp>
+#include <cucumber-cpp/internal/utils/make_unique.hpp>
 
 namespace cucumber {
 namespace internal {
@@ -13,9 +13,15 @@ BeginScenarioCommand::BeginScenarioCommand(const CukeEngine::tags_type& tags) :
     ScenarioCommand(tags) {
 }
 
-boost::shared_ptr<WireResponse> BeginScenarioCommand::run(CukeEngine& engine) const {
+unique<WireResponse>::ptr BeginScenarioCommand::run(CukeEngine& engine) const {
     engine.beginScenario(tags);
-    return boost::make_shared<SuccessResponse>();
+    return unique<WireResponse>::ptr(
+            make_unique<SuccessResponse>()
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 
@@ -23,9 +29,15 @@ EndScenarioCommand::EndScenarioCommand(const CukeEngine::tags_type& tags) :
     ScenarioCommand(tags) {
 }
 
-boost::shared_ptr<WireResponse> EndScenarioCommand::run(CukeEngine& engine) const {
+unique<WireResponse>::ptr EndScenarioCommand::run(CukeEngine& engine) const {
     engine.endScenario(tags);
-    return boost::make_shared<SuccessResponse>();
+    return unique<WireResponse>::ptr(
+            make_unique<SuccessResponse>()
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 
@@ -33,9 +45,15 @@ StepMatchesCommand::StepMatchesCommand(const std::string & stepName) :
     stepName(stepName) {
 }
 
-boost::shared_ptr<WireResponse> StepMatchesCommand::run(CukeEngine& engine) const {
+unique<WireResponse>::ptr StepMatchesCommand::run(CukeEngine& engine) const {
     std::vector<StepMatch> matchingSteps = engine.stepMatches(stepName);
-    return boost::make_shared<StepMatchesResponse>(matchingSteps);
+    return unique<WireResponse>::ptr(
+            make_unique<StepMatchesResponse>(matchingSteps)
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 
@@ -47,16 +65,40 @@ InvokeCommand::InvokeCommand(const std::string & stepId,
     tableArg(tableArg) {
 }
 
-boost::shared_ptr<WireResponse> InvokeCommand::run(CukeEngine& engine) const {
+unique<WireResponse>::ptr InvokeCommand::run(CukeEngine& engine) const {
     try {
         engine.invokeStep(stepId, args, tableArg);
-        return boost::make_shared<SuccessResponse>();
+        return unique<WireResponse>::ptr(
+                make_unique<SuccessResponse>()
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+            );
     } catch (const InvokeFailureException& e) {
-        return boost::make_shared<FailureResponse>(e.getMessage(), e.getExceptionType());
+        return unique<WireResponse>::ptr(
+                make_unique<FailureResponse>(e.getMessage(), e.getExceptionType())
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+            );
     } catch (const PendingStepException& e) {
-        return boost::make_shared<PendingResponse>(e.getMessage());
+        return unique<WireResponse>::ptr(
+                make_unique<PendingResponse>(e.getMessage())
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+            );
     } catch (...) {
-        return boost::make_shared<FailureResponse>();
+        return unique<WireResponse>::ptr(
+                make_unique<FailureResponse>()
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+            );
     }
 }
 
@@ -67,13 +109,25 @@ SnippetTextCommand::SnippetTextCommand(const std::string & keyword, const std::s
     multilineArgClass(multilineArgClass) {
 }
 
-boost::shared_ptr<WireResponse> SnippetTextCommand::run(CukeEngine& engine) const {
-    return boost::make_shared<SnippetTextResponse>(engine.snippetText(keyword, name, multilineArgClass));
+unique<WireResponse>::ptr SnippetTextCommand::run(CukeEngine& engine) const {
+    return unique<WireResponse>::ptr(
+            make_unique<SnippetTextResponse>(engine.snippetText(keyword, name, multilineArgClass))
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 
-boost::shared_ptr<WireResponse> FailingCommand::run(CukeEngine& /*engine*/) const {
-    return boost::make_shared<FailureResponse>();
+unique<WireResponse>::ptr FailingCommand::run(CukeEngine& /*engine*/) const {
+    return unique<WireResponse>::ptr(
+            make_unique<FailureResponse>()
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 }

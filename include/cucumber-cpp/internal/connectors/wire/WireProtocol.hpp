@@ -3,7 +3,7 @@
 
 #include "ProtocolHandler.hpp"
 #include "../../CukeEngine.hpp"
-#include <boost/shared_ptr.hpp>
+#include "../../utils/unique_ptr.hpp"
 
 namespace cucumber {
 namespace internal {
@@ -100,7 +100,7 @@ public:
      *
      * @return The command response (ownership passed to the caller)
      */
-    virtual boost::shared_ptr<WireResponse> run(CukeEngine& engine) const = 0;
+    virtual unique<WireResponse>::ptr run(CukeEngine& engine) const = 0;
 
     virtual ~WireCommand() {};
 };
@@ -134,7 +134,7 @@ public:
      *
      * @throws WireMessageCodecException
      */
-    virtual boost::shared_ptr<WireCommand> decode(const std::string &request) const = 0;
+    virtual unique<WireCommand>::ptr decode(const std::string &request) const = 0;
 
     /**
      * Encodes a response to wire format.
@@ -154,7 +154,7 @@ public:
 class JsonSpiritWireMessageCodec : public WireMessageCodec {
 public:
     JsonSpiritWireMessageCodec();
-    boost::shared_ptr<WireCommand> decode(const std::string &request) const;
+    unique<WireCommand>::ptr decode(const std::string &request) const;
     const std::string encode(const WireResponse& response) const;
 };
 

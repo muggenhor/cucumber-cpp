@@ -3,8 +3,6 @@
 namespace cucumber {
 namespace internal {
 
-using boost::shared_ptr;
-
 Regex & AndTagExpression::csvTagNotationRegex() {
     static Regex r("\\s*\"([^\"]+)\"\\s*(?:,|$)");
     return r;

@@ -1,11 +1,11 @@
 #include <cucumber-cpp/internal/connectors/wire/WireProtocol.hpp>
 #include <cucumber-cpp/internal/connectors/wire/WireProtocolCommands.hpp>
+#include <cucumber-cpp/internal/utils/make_unique.hpp>
+#include <cucumber-cpp/internal/utils/unique_ptr.hpp>
 
 #include <json_spirit/json_spirit_reader_template.h>
 #include <json_spirit/json_spirit_writer_template.h>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
 
@@ -88,7 +88,7 @@ void SnippetTextResponse::accept(WireResponseVisitor& visitor) const {
 
 
 namespace {
-    typedef boost::shared_ptr<WireCommand> (*CommandDecoder)(const mValue& jsonArgs);
+    typedef unique<WireCommand>::ptr (*CommandDecoder)(const mValue& jsonArgs);
 
     CukeEngine::tags_type getScenarioTags(const mValue& jsonArgs) {
         CukeEngine::tags_type tags;
@@ -101,18 +101,33 @@ namespace {
         return tags;
     }
 
-    boost::shared_ptr<WireCommand> BeginScenarioDecoder(const mValue& jsonArgs) {
-        return boost::make_shared<BeginScenarioCommand>(getScenarioTags(jsonArgs));
+    unique<WireCommand>::ptr BeginScenarioDecoder(const mValue& jsonArgs) {
+        return unique<WireCommand>::ptr(make_unique<BeginScenarioCommand>(getScenarioTags(jsonArgs))
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+                .release()
+#endif
+            );
     }
 
-    boost::shared_ptr<WireCommand> EndScenarioDecoder(const mValue& jsonArgs) {
-        return boost::make_shared<EndScenarioCommand>(getScenarioTags(jsonArgs));
+    unique<WireCommand>::ptr EndScenarioDecoder(const mValue& jsonArgs) {
+        return unique<WireCommand>::ptr(make_unique<EndScenarioCommand>(getScenarioTags(jsonArgs))
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+                .release()
+#endif
+            );
     }
 
-    boost::shared_ptr<WireCommand> StepMatchesDecoder(const mValue& jsonArgs) {
+    unique<WireCommand>::ptr StepMatchesDecoder(const mValue& jsonArgs) {
         mObject stepMatchesArgs(jsonArgs.get_obj());
         const std::string& nameToMatch(stepMatchesArgs["name_to_match"].get_str());
-        return boost::make_shared<StepMatchesCommand>(nameToMatch);
+        return unique<WireCommand>::ptr(make_unique<StepMatchesCommand>(nameToMatch)
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+                .release()
+#endif
+            );
     }
 
     void fillTableArg(const mArray& jsonTableArg, CukeEngine::invoke_table_type& tableArg) {
@@ -150,22 +165,32 @@ namespace {
         }
     }
 
-    boost::shared_ptr<WireCommand> InvokeDecoder(const mValue& jsonArgs) {
+    unique<WireCommand>::ptr InvokeDecoder(const mValue& jsonArgs) {
         mObject invokeParams(jsonArgs.get_obj());
 
         CukeEngine::invoke_args_type args;
         CukeEngine::invoke_table_type tableArg;
         const std::string & id(invokeParams["id"].get_str());
         fillInvokeArgs(invokeParams, args, tableArg);
-        return boost::make_shared<InvokeCommand>(id, args, tableArg);
+        return unique<WireCommand>::ptr(make_unique<InvokeCommand>(id, args, tableArg)
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+                .release()
+#endif
+            );
     }
 
-    boost::shared_ptr<WireCommand> SnippetTextDecoder(const mValue& jsonArgs) {
+    unique<WireCommand>::ptr SnippetTextDecoder(const mValue& jsonArgs) {
         mObject snippetTextArgs(jsonArgs.get_obj());
         const std::string & stepKeyword(snippetTextArgs["step_keyword"].get_str());
         const std::string & stepName(snippetTextArgs["step_name"].get_str());
         const std::string & multilineArgClass(snippetTextArgs["multiline_arg_class"].get_str());
-        return boost::make_shared<SnippetTextCommand>(stepKeyword, stepName, multilineArgClass);
+        return unique<WireCommand>::ptr(make_unique<SnippetTextCommand>(stepKeyword, stepName, multilineArgClass)
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+                .release()
+#endif
+            );
     }
 }
 
@@ -181,7 +206,7 @@ static const std::map<std::string, CommandDecoder> commandDecodersMap =
 
 JsonSpiritWireMessageCodec::JsonSpiritWireMessageCodec() {};
 
-boost::shared_ptr<WireCommand> JsonSpiritWireMessageCodec::decode(const std::string &request) const {
+unique<WireCommand>::ptr JsonSpiritWireMessageCodec::decode(const std::string &request) const {
     std::istringstream is(request);
     mValue json;
     try {
@@ -202,7 +227,12 @@ boost::shared_ptr<WireCommand> JsonSpiritWireMessageCodec::decode(const std::str
     } catch (...) {
         // LOG Error decoding wire protocol command
     }
-    return boost::make_shared<FailingCommand>();
+    return unique<WireCommand>::ptr(make_unique<FailingCommand>()
+#if BOOST_VERSION < 105900
+            // This version of unique_ptr doesn't support implicit conversions to pointers up the class hierarchy
+            .release()
+#endif
+        );
 }
 
 namespace {
@@ -311,8 +341,18 @@ std::string WireProtocolHandler::handle(const std::string &request) const {
     std::string response;
     // LOG request
     try {
-        boost::shared_ptr<const WireCommand> command = codec.decode(request);
-        boost::shared_ptr<const WireResponse> wireResponse = command->run(engine);
+        unique<const WireCommand>::ptr command(codec.decode(request)
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers with const added
+                .release()
+#endif
+            );
+        unique<const WireResponse>::ptr wireResponse(command->run(engine)
+#if BOOST_VERSION < 105900
+                // This version of unique_ptr doesn't support implicit conversions to pointers with const added
+                .release()
+#endif
+            );
         response = codec.encode(*wireResponse);
     } catch (...) {
         response = "[\"fail\"]";
