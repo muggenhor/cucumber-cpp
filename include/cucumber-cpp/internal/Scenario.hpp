@@ -8,7 +8,7 @@ namespace internal {
 
 class Scenario {
 public:
-    Scenario(const TagExpression::tag_list& tags = TagExpression::tag_list());
+    Scenario(TagExpression::tag_list tags = TagExpression::tag_list());
 
     const TagExpression::tag_list & getTags();
 private:

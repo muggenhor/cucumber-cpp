@@ -1,24 +1,25 @@
 #include "cucumber-cpp/internal/CukeEngine.hpp"
+#include <cucumber-cpp/internal/utils/move.hpp>
 
 namespace cucumber {
 namespace internal {
 
-InvokeException::InvokeException(const std::string & message) :
-    message(message) {
+InvokeException::InvokeException(std::string message) :
+    message(move(message)) {
 }
 
 InvokeException::InvokeException(const InvokeException &rhs) :
     message(rhs.message) {
 }
 
-const std::string InvokeException::getMessage() const {
+const std::string& InvokeException::getMessage() const {
     return message;
 }
 
 
-InvokeFailureException::InvokeFailureException(const std::string & message, const std::string & exceptionType) :
-        InvokeException(message),
-        exceptionType(exceptionType) {
+InvokeFailureException::InvokeFailureException(std::string message, std::string exceptionType) :
+    InvokeException(move(message)),
+    exceptionType(move(exceptionType)) {
 }
 
 InvokeFailureException::InvokeFailureException(const InvokeFailureException &rhs) :
@@ -26,7 +27,7 @@ InvokeFailureException::InvokeFailureException(const InvokeFailureException &rhs
     exceptionType(rhs.exceptionType) {
 }
 
-const std::string InvokeFailureException::getExceptionType() const {
+const std::string& InvokeFailureException::getExceptionType() const {
     return exceptionType;
 }
 

@@ -1,16 +1,17 @@
 #include <cucumber-cpp/internal/connectors/wire/WireProtocolCommands.hpp>
+#include <cucumber-cpp/internal/utils/move.hpp>
 #include <boost/make_shared.hpp>
 
 namespace cucumber {
 namespace internal {
 
-ScenarioCommand::ScenarioCommand(const CukeEngine::tags_type& tags) :
-    tags(tags) {
+ScenarioCommand::ScenarioCommand(CukeEngine::tags_type tags) :
+    tags(move(tags)) {
 }
 
 
-BeginScenarioCommand::BeginScenarioCommand(const CukeEngine::tags_type& tags) :
-    ScenarioCommand(tags) {
+BeginScenarioCommand::BeginScenarioCommand(CukeEngine::tags_type tags) :
+    ScenarioCommand(move(tags)) {
 }
 
 boost::shared_ptr<WireResponse> BeginScenarioCommand::run(CukeEngine& engine) const {
@@ -19,8 +20,8 @@ boost::shared_ptr<WireResponse> BeginScenarioCommand::run(CukeEngine& engine) co
 }
 
 
-EndScenarioCommand::EndScenarioCommand(const CukeEngine::tags_type& tags) :
-    ScenarioCommand(tags) {
+EndScenarioCommand::EndScenarioCommand(CukeEngine::tags_type tags) :
+    ScenarioCommand(move(tags)) {
 }
 
 boost::shared_ptr<WireResponse> EndScenarioCommand::run(CukeEngine& engine) const {
@@ -29,8 +30,8 @@ boost::shared_ptr<WireResponse> EndScenarioCommand::run(CukeEngine& engine) cons
 }
 
 
-StepMatchesCommand::StepMatchesCommand(const std::string & stepName) :
-    stepName(stepName) {
+StepMatchesCommand::StepMatchesCommand(std::string stepName) :
+    stepName(move(stepName)) {
 }
 
 boost::shared_ptr<WireResponse> StepMatchesCommand::run(CukeEngine& engine) const {
@@ -39,11 +40,11 @@ boost::shared_ptr<WireResponse> StepMatchesCommand::run(CukeEngine& engine) cons
 }
 
 
-InvokeCommand::InvokeCommand(const std::string & stepId,
-                             const CukeEngine::invoke_args_type& args,
+InvokeCommand::InvokeCommand(std::string                          stepId,
+                             CukeEngine::invoke_args_type         args,
                              const CukeEngine::invoke_table_type& tableArg) :
-    stepId(stepId),
-    args(args),
+    stepId(move(stepId)),
+    args(move(args)),
     tableArg(tableArg) {
 }
 
@@ -61,10 +62,10 @@ boost::shared_ptr<WireResponse> InvokeCommand::run(CukeEngine& engine) const {
 }
 
 
-SnippetTextCommand::SnippetTextCommand(const std::string & keyword, const std::string & name, const std::string & multilineArgClass) :
-    keyword(keyword),
-    name(name),
-    multilineArgClass(multilineArgClass) {
+SnippetTextCommand::SnippetTextCommand(std::string keyword, std::string name, std::string multilineArgClass) :
+    keyword(move(keyword)),
+    name(move(name)),
+    multilineArgClass(move(multilineArgClass)) {
 }
 
 boost::shared_ptr<WireResponse> SnippetTextCommand::run(CukeEngine& engine) const {

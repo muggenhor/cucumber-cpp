@@ -1,5 +1,6 @@
 #include <cucumber-cpp/internal/connectors/wire/WireProtocol.hpp>
 #include <cucumber-cpp/internal/connectors/wire/WireProtocolCommands.hpp>
+#include <cucumber-cpp/internal/utils/move.hpp>
 
 #include <json_spirit/json_spirit_reader_template.h>
 #include <json_spirit/json_spirit_writer_template.h>
@@ -28,16 +29,16 @@ void SuccessResponse::accept(WireResponseVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-FailureResponse::FailureResponse(const std::string & message, const std::string & exceptionType) :
-    message(message),
-    exceptionType(exceptionType) {
+FailureResponse::FailureResponse(std::string message, std::string exceptionType) :
+    message(move(message)),
+    exceptionType(move(exceptionType)) {
 }
 
-const std::string FailureResponse::getMessage() const {
+const std::string& FailureResponse::getMessage() const {
     return message;
 }
 
-const std::string FailureResponse::getExceptionType() const {
+const std::string& FailureResponse::getExceptionType() const {
     return exceptionType;
 }
 
@@ -45,11 +46,11 @@ void FailureResponse::accept(WireResponseVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-PendingResponse::PendingResponse(const std::string & message) :
-    message(message) {
+PendingResponse::PendingResponse(std::string message) :
+    message(move(message)) {
 }
 
-const std::string PendingResponse::getMessage() const {
+const std::string& PendingResponse::getMessage() const {
     return message;
 }
 
@@ -57,8 +58,8 @@ void PendingResponse::accept(WireResponseVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-StepMatchesResponse::StepMatchesResponse(const std::vector<StepMatch> & matchingSteps)
-    : matchingSteps(matchingSteps) {
+StepMatchesResponse::StepMatchesResponse(std::vector<StepMatch> matchingSteps)
+    : matchingSteps(move(matchingSteps)) {
 }
 
 const std::vector<StepMatch>& StepMatchesResponse::getMatchingSteps() const {
@@ -69,11 +70,11 @@ void StepMatchesResponse::accept(WireResponseVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-SnippetTextResponse::SnippetTextResponse(const std::string & stepSnippet) :
-    stepSnippet(stepSnippet) {
+SnippetTextResponse::SnippetTextResponse(std::string stepSnippet) :
+    stepSnippet(move(stepSnippet)) {
 }
 
-const std::string SnippetTextResponse::getStepSnippet() const {
+const std::string& SnippetTextResponse::getStepSnippet() const {
     return stepSnippet;
 }
 

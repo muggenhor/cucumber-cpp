@@ -33,10 +33,10 @@ private:
     const std::string message, exceptionType;
 
 public:
-    FailureResponse(const std::string & message = "", const std::string & exceptionType = "");
+    FailureResponse(std::string message = "", std::string exceptionType = "");
 
-    const std::string getMessage() const;
-    const std::string getExceptionType() const;
+    const std::string& getMessage() const;
+    const std::string& getExceptionType() const;
 
     void accept(WireResponseVisitor& visitor) const;
 };
@@ -46,9 +46,9 @@ private:
     const std::string message;
 
 public:
-    PendingResponse(const std::string & message);
+    PendingResponse(std::string message);
 
-    const std::string getMessage() const;
+    const std::string& getMessage() const;
 
     void accept(WireResponseVisitor& visitor) const;
 };
@@ -58,7 +58,7 @@ private:
     const std::vector<StepMatch> matchingSteps;
 
 public:
-    StepMatchesResponse(const std::vector<StepMatch> & matchingSteps);
+    StepMatchesResponse(std::vector<StepMatch> matchingSteps);
     const std::vector<StepMatch>& getMatchingSteps() const;
 
     void accept(WireResponseVisitor& visitor) const;
@@ -69,9 +69,9 @@ private:
     const std::string stepSnippet;
 
 public:
-    SnippetTextResponse(const std::string & stepSnippet);
+    SnippetTextResponse(std::string stepSnippet);
 
-    const std::string getStepSnippet() const;
+    const std::string& getStepSnippet() const;
 
     void accept(WireResponseVisitor& visitor) const;
 };

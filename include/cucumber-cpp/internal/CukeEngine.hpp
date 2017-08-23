@@ -28,10 +28,10 @@ private:
     const std::string message;
 
 public:
-    InvokeException(const std::string & message);
+    InvokeException(std::string message);
     InvokeException(const InvokeException &rhs);
 
-    const std::string getMessage() const;
+    const std::string& getMessage() const;
 
     virtual ~InvokeException() {}
 };
@@ -41,10 +41,10 @@ private:
     const std::string exceptionType;
 
 public:
-    InvokeFailureException(const std::string & message, const std::string & exceptionType);
+    InvokeFailureException(std::string message, std::string exceptionType);
     InvokeFailureException(const InvokeFailureException &rhs);
 
-    const std::string getExceptionType() const;
+    const std::string& getExceptionType() const;
 };
 
 class PendingStepException : public InvokeException {

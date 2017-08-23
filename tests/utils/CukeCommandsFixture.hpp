@@ -8,7 +8,6 @@
 #include <boost/make_shared.hpp>
 
 using namespace cucumber::internal;
-using boost::shared_ptr;
 
 class EmptyStep : public GenericStep {
     void body() {}
