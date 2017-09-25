@@ -42,6 +42,7 @@ addons:
       - libboost-filesystem-dev
       - libboost-program-options-dev
       - libboost-test-dev
+      - gdb
       - google-mock
       - ninja-build
       - valgrind

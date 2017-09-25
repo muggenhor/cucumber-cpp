@@ -1,4 +1,42 @@
 #!/bin/sh
+
+run_feature_test() {
+    EXECUTABLE="$1"
+    shift
+    FEATURE_DIR="$(dirname "${EXECUTABLE}" | sed 's|^build/||')"
+    LOG="${EXECUTABLE}.log"
+
+    if [ ! -x "${EXECUTABLE}" ]; then
+        return
+    fi
+
+    "${EXECUTABLE}" "$@" > "${LOG}" 2>&1 &
+    sleep 1
+    cucumber "${FEATURE_DIR}" || {
+        r=$?
+        wait % || { 
+            r=$?
+            cat "${LOG}" >&2
+            for corefile in core*; do
+                gdb "${EXECUTABLE}" "${corefile}" -ex "set pagination 0" -ex "thread apply all backtrace full" -batch
+                rm -f "${corefile}"
+            done
+            return $r
+        }
+        cat "${LOG}" >&2
+        return $r
+    }
+    wait % || {
+        r=$?
+        cat "${LOG}" >&2
+        for corefile in core*; do
+            gdb "${EXECUTABLE}" "${corefile}" -ex "set pagination 0" -ex "thread apply all backtrace full" -batch
+            rm -f "${corefile}"
+        done
+        return $r
+    }
+}
+
 set -e #break script on non-zero exitcode from any command
 set -x #display command being executed
 
@@ -7,7 +45,7 @@ startXvfb () {
 # Starting Xvfb hangs on OSX, that's why we do this on Linux only now
     if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
         trap : USR1
-        (trap '' USR1; Xvfb $DISPLAY -screen 0 640x480x8 -nolisten tcp > /dev/null 2>&1) &
+        (trap '' USR1; Xvfb $DISPLAY -screen 0 640x480x8 -nolisten tcp > xvfb.log 2>&1) &
         XVFBPID=$!
         wait || :
         trap '' USR1
@@ -16,7 +54,7 @@ startXvfb () {
             exit 1
         fi
     else
-        sudo Xvfb $DISPLAY -screen 0 640x480x8 -nolisten tcp > /dev/null 2>&1 &
+        sudo Xvfb $DISPLAY -screen 0 640x480x8 -nolisten tcp > xvfb.log 2>&1 &
         XVFBPID=$!
         sleep 5 
     fi
@@ -72,18 +110,15 @@ cmake --build build --target features
 
 startXvfb # Start virtual X display server
 
+ulimit -S -c unlimited
+
 for TEST in \
     build/examples/Calc/GTestCalculatorSteps \
     build/examples/Calc/QtTestCalculatorSteps \
     build/examples/Calc/BoostCalculatorSteps \
     build/examples/Calc/FuncArgsCalculatorSteps \
 ; do
-    if [ -f "${TEST}" ]; then
-        "${TEST}" > /dev/null &
-        sleep 1
-        cucumber examples/Calc
-        wait %
-    fi
+    run_feature_test "${TEST}"
 done
 
 for TEST in \
@@ -91,23 +126,20 @@ for TEST in \
     build/examples/CalcQt/QtTestCalculatorQtSteps \
     build/examples/CalcQt/BoostCalculatorQtSteps \
 ; do
-    if [ -f "${TEST}" -a -n "${DISPLAY:-}" ]; then
-        "${TEST}" 2> /dev/null &
-        sleep 1
-        cucumber examples/CalcQt
-        wait %
+    if [ -n "${DISPLAY:-}" ]; then
+        run_feature_test "${TEST}" || {
+            r=$?
+            cat xvfb.log >&2
+            exit $r
+        }
     fi
 done
 
 # Test unix sockets
 SOCK=cucumber.wire.sock
 TEST=build/examples/FeatureShowcase/FeatureShowcaseSteps
-if [ -f "${TEST}" ]; then
-    echo "unix: ${SOCK}" > examples/FeatureShowcase/features/step_definitions/cucumber.wire
-    "${TEST}" --unix "${SOCK}" > /dev/null &
-    cucumber examples/FeatureShowcase
-    wait %
-fi
+echo "unix: ${SOCK}" > examples/FeatureShowcase/features/step_definitions/cucumber.wire
+run_feature_test "${TEST}" --unix "${SOCK}" > /dev/null &
 
 killXvfb
 
